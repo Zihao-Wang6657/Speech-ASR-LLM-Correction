@@ -1,0 +1,6 @@
+﻿setting,num_total,num_success,average_cer,min_cer,max_cer,result_file
+Clean,11,11,0.0000,0.0000,0.0000,D:\Github_repo\Speech-Project\results\asr_results_clean.csv
+Speed 0.9x,11,11,0.0000,0.0000,0.0000,D:\Github_repo\Speech-Project\results\asr_results_speed_0_9.csv
+Speed 1.1x,11,11,0.0051,0.0000,0.0556,D:\Github_repo\Speech-Project\results\asr_results_speed_1_1.csv
+Noise 10dB,11,11,0.0000,0.0000,0.0000,D:\Github_repo\Speech-Project\results\asr_results_noise_10db.csv
+Noise 5dB,11,11,0.0065,0.0000,0.0714,D:\Github_repo\Speech-Project\results\asr_results_noise_5db.csv

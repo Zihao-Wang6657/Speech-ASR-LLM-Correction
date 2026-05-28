@@ -1,0 +1,27 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment and secrets
+.env
+*.key
+
+# Temporary files
+data/mandarin/tmp/
+
+# Official external repository
+FunASR/
+
+# Large or private source media
+data/basketball_commentary/source/
+
+# Model/cache folders
+.cache/
+models/
+pretrained_models/
+
+# OS files
+.DS_Store
+Thumbs.db

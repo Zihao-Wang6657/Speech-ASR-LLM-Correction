@@ -1,0 +1,12 @@
+﻿utt_id,audio_path,reference
+test_001,data/mandarin/processed_audio/speed_0_9/test_001.wav,今天我们测试一下中文语音识别系统
+test_002,data/mandarin/processed_audio/speed_0_9/test_002.wav,我的新吉他非常的好看我已经迫不及待的想拿起它了
+test_003,data/mandarin/processed_audio/speed_0_9/test_003.wav,从这个角度看不到月亮
+test_004,data/mandarin/processed_audio/speed_0_9/test_004.wav,现在是二零二六年五月二十七日的晚上九点四十五分
+test_005,data/mandarin/processed_audio/speed_0_9/test_005.wav,明天下午我们一起去附近公园的草坪上喝酒怎么样
+test_006,data/mandarin/processed_audio/speed_0_9/test_006.wav,我买了两个哑铃但是我从来都没有用过
+test_007,data/mandarin/processed_audio/speed_0_9/test_007.wav,今天的气温是二十五度到三十度到了晚上空气非常的清新
+test_008,data/mandarin/processed_audio/speed_0_9/test_008.wav,明天记得把你的论文初稿发给我
+test_009,data/mandarin/processed_audio/speed_0_9/test_009.wav,我喜欢给在世界各地的朋友们寄明信片
+test_010,data/mandarin/processed_audio/speed_0_9/test_010.wav,坚持每天锻炼三十分钟让我感到神清气爽
+test_011,data/mandarin/processed_audio/speed_0_9/test_011.wav,明天晚上我们一起打游戏吧

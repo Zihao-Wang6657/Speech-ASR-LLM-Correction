@@ -15,7 +15,7 @@
 
 | 模块 | 核心结果 |
 | --- | --- |
-| 普通话自录语音 | 多条 clean speech 平均 CER 为 `0.0000`，轻度语速和噪声扰动下整体稳定。 |
+| 普通话自录语音 | 构建多条 clean speech 数据, 平均 CER 为 `0.0000`，轻度语速和噪声扰动下整体稳定。 |
 | 篮球解说 ASR | 构建多条篮球解说片段，原始平均 CER 为 `0.1322`，错误集中在球员名、球队名、篮球术语和比赛阶段。 |
 | 领域词表增强 LLM 纠错 | 加入篮球领域词表后，平均 CER 从 `0.1322` 降到 `0.0845`，相对下降约 `36.1%`。 |
 | Prompt Ablation | 对比 baseline、conservative、two-stage、few-shot 四种 prompt；baseline 最低 CER 为 `0.0787`，conservative/few-shot 更稳定。 |

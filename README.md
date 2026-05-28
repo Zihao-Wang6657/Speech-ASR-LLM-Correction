@@ -8,20 +8,20 @@
 - 篮球解说领域语音识别评测；
 - 基于 LLM 的 ASR 后处理纠错。
 
-尝试围绕现有语音基础模型构建一个小型的ASR评测与错误分析流程，并接入LLM来进行进一步的纠错.
+本项目围绕现有语音基础模型构建一个小型评测与错误分析流程。
 
 ---
 
 ## 项目亮点
 
-1. **完成普通话自录语音评测**  
+1. **普通话自录语音评测**  
    在 11 条自录普通话短句上，FunASR/SenseVoice 在 clean speech 和轻度扰动条件下表现稳定。
 
-2. **构建篮球解说领域测试集**  
-   篮球解说语音包含更快语速、领域术语、球员名、球队名和轻微重叠语音，明显比普通话短句更具挑战性。
+2. **篮球解说领域测试集**  
+   构建了 11 条篮球比赛解说短语音片段。相比普通话短句，篮球解说包含更快语速、球员名、球队名、篮球术语和轻微重叠语音，更接近真实领域语音场景。
 
-3. **引入领域词表增强 LLM 纠错**  
-   在篮球解说 ASR 输出上，向 LLM 提供篮球领域词表后，平均 CER 从 `0.1879` 降低到 `0.0840`，相对下降约 `55.3%`。
+3. **领域词表增强 LLM 纠错**  
+   在篮球解说 ASR 输出上，向 LLM 提供篮球领域词表后，平均 CER 从 `0.1322` 降低到 `0.0845`，相对下降约 `36.1%`。
 
 ---
 
@@ -54,6 +54,9 @@
 ```text
 Speech-Project
 │
+├── README.md
+├── .gitignore
+│
 ├── assets
 │   └── Gradio_demo
 │       └── test_001.png
@@ -62,7 +65,16 @@ Speech-Project
 │   ├── mandarin
 │   │   ├── raw_audio
 │   │   ├── processed_audio
+│   │   │   ├── speed_0_9
+│   │   │   ├── speed_1_1
+│   │   │   ├── noise_10db
+│   │   │   └── noise_5db
 │   │   ├── manifests
+│   │   │   ├── test_manifest.csv
+│   │   │   ├── test_manifest_speed_0_9.csv
+│   │   │   ├── test_manifest_speed_1_1.csv
+│   │   │   ├── test_manifest_noise_10db.csv
+│   │   │   └── test_manifest_noise_5db.csv
 │   │   └── tmp
 │   │
 │   └── basketball_commentary
@@ -70,10 +82,11 @@ Speech-Project
 │       ├── segments
 │       └── manifests
 │           ├── segment_plan.csv
+│           ├── segment_plan_match_002.csv
 │           ├── basketball_commentary_manifest.csv
+│           ├── basketball_commentary_manifest_match_002.csv
+│           ├── basketball_commentary_manifest_all.csv
 │           └── basketball_lexicon.txt
-│
-├── FunASR
 │
 ├── notes
 │   ├── setup_funasr_demo.md
@@ -87,34 +100,34 @@ Speech-Project
 │   ├── mandarin
 │   └── basketball_commentary
 │       ├── asr_results_basketball_commentary.csv
-│       └── asr_results_basketball_commentary_llm_corrected.csv
+│       ├── asr_results_basketball_commentary_match_002.csv
+│       ├── asr_results_basketball_commentary_all.csv
+│       └── asr_results_basketball_commentary_all_llm_corrected.csv
 │
-├── scripts
-│   ├── create_robustness_data.py
-│   ├── evaluate_asr.py
-│   ├── summarize_asr_results.py
-│   ├── llm_correct_asr.py
-│   ├── create_basketball_segments.py
-│   └── llm_correct_basketball_asr.py
-│
-└── README.md
+└── scripts
+    ├── create_robustness_data.py
+    ├── evaluate_asr.py
+    ├── summarize_asr_results.py
+    ├── llm_correct_asr.py
+    ├── create_basketball_segments.py
+    └── llm_correct_basketball_asr.py
 ```
 
 ---
 
 ## 文件夹说明
 
-| 路径                                    | 说明                              |
-| --------------------------------------- | --------------------------------- |
-| `assets/`                               | README 或报告中使用的截图         |
-| `data/mandarin/`                        | 普通话自录语音数据集              |
-| `data/basketball_commentary/source/`    | 篮球解说原始视频或音频            |
-| `data/basketball_commentary/segments/`  | 切分后的篮球解说短音频            |
-| `data/basketball_commentary/manifests/` | 篮球解说数据索引和领域词表        |
-| `notes/`                                | 实验记录和分析文档                |
-| `results/mandarin/`                     | 普通话实验结果                    |
-| `results/basketball_commentary/`        | 篮球解说实验结果                  |
-| `scripts/`                              | 数据处理、ASR 评测和 LLM 纠错脚本 |
+| 路径                                    | 说明                                 |
+| --------------------------------------- | ------------------------------------ |
+| `assets/`                               | README 或报告中使用的截图            |
+| `data/mandarin/`                        | 普通话自录语音数据集                 |
+| `data/basketball_commentary/source/`    | 篮球解说原始视频或音频               |
+| `data/basketball_commentary/segments/`  | 切分后的篮球解说短音频               |
+| `data/basketball_commentary/manifests/` | 篮球解说数据索引、切片计划和领域词表 |
+| `notes/`                                | 实验记录和分析文档                   |
+| `results/mandarin/`                     | 普通话实验结果                       |
+| `results/basketball_commentary/`        | 篮球解说实验结果                     |
+| `scripts/`                              | 数据处理、ASR 评测和 LLM 纠错脚本    |
 
 ---
 
@@ -268,7 +281,7 @@ python scripts\evaluate_asr.py `
 
 ## 篮球解说语音实验
 
-### 篮球解说切片
+### 数据构建
 
 篮球解说原始视频或音频放在：
 
@@ -280,9 +293,10 @@ data/basketball_commentary/source/
 
 ```text
 data/basketball_commentary/manifests/segment_plan.csv
+data/basketball_commentary/manifests/segment_plan_match_002.csv
 ```
 
-格式为：
+切片计划格式为：
 
 ```csv
 utt_id,start,duration,reference
@@ -297,27 +311,32 @@ python scripts\create_basketball_segments.py `
   --source data/basketball_commentary/source/match_001.mp4
 ```
 
-生成的音频片段存放在：
+对于第二段视频：
 
-```text
-data/basketball_commentary/segments/
+```powershell
+python scripts\create_basketball_segments.py `
+  --source data/basketball_commentary/source/match_002.mp4 `
+  --segment-plan data/basketball_commentary/manifests/segment_plan_match_002.csv `
+  --manifest-output data/basketball_commentary/manifests/basketball_commentary_manifest_match_002.csv
 ```
 
-生成的 manifest 文件为：
+合并后的总 manifest 为：
 
 ```text
-data/basketball_commentary/manifests/basketball_commentary_manifest.csv
+data/basketball_commentary/manifests/basketball_commentary_manifest_all.csv
 ```
 
 ### 运行篮球解说 ASR 评测
 
 ```powershell
 python scripts\evaluate_asr.py `
-  --manifest data/basketball_commentary/manifests/basketball_commentary_manifest.csv `
-  --output results/basketball_commentary/asr_results_basketball_commentary.csv
+  --manifest data/basketball_commentary/manifests/basketball_commentary_manifest_all.csv `
+  --output results/basketball_commentary/asr_results_basketball_commentary_all.csv
 ```
 
 ### 篮球解说 ASR 结果
+
+扩展后的篮球解说测试集包含 11 个片段。原始 ASR 结果如下：
 
 | Sample         |    CER | 主要错误类型                   |
 | -------------- | -----: | ------------------------------ |
@@ -326,19 +345,25 @@ python scripts\evaluate_asr.py `
 | basketball_003 | 0.1379 | 篮球术语识别错误               |
 | basketball_004 | 0.1250 | 篮球术语与功能词识别错误       |
 | basketball_005 | 0.3103 | 违例、球员名和封盖术语识别错误 |
+| basketball_006 | 0.1154 | 球队名和比赛节次识别错误       |
+| basketball_007 | 0.0500 | 球员名和语气词识别错误         |
+| basketball_008 | 0.0000 | 原始识别正确                   |
+| basketball_009 | 0.2333 | 球员名和漏识别错误             |
+| basketball_010 | 0.0909 | 语气词写法差异                 |
+| basketball_011 | 0.0256 | 近义词识别差异                 |
 
 平均 CER：
 
 ```text
-0.1879
+0.1322
 ```
 
 相比普通话自录短句，篮球解说语音明显更难。主要错误集中在：
 
-- 球队名和地名，例如“圣安东尼奥”；
-- 比赛阶段表达，例如“西决”；
-- 球员名，例如“哈腾”“文班”“卡斯尔”；
-- 篮球术语，例如“协防”“弧顶”“持球人”“封盖”；
+- 球队名和地名，例如“圣安东尼奥”“雷霆”；
+- 比赛阶段表达，例如“西决”“第一节”；
+- 球员名，例如“哈腾”“文班”“卡斯尔”“亚历山大”；
+- 篮球术语，例如“协防”“弧顶”“持球人”“封盖”“中距离”；
 - 快速语速和轻微重叠语音导致的漏识别。
 
 ---
@@ -353,29 +378,32 @@ python scripts\evaluate_asr.py `
 data/basketball_commentary/manifests/basketball_lexicon.txt
 ```
 
-当前词表包括：
+当前词表包括篮球解说中出现的球队名、球员名、比赛阶段表达和篮球术语，例如：
 
 ```text
 圣安东尼奥
 马刺
 西决
-主队
-跳到球权
+雷霆
 哈腾
 文班
 卡森
 卡斯尔
-对位
+福克斯
+亚历山大
 协防
 弧顶
 投手
 一五挡拆
 挡拆
 持球人
-季后赛
 二十四秒违例
 封盖
-切特
+双塔
+防守
+篮板
+中距离
+挑战
 ```
 
 该词表向 LLM 提供篮球领域先验。LLM 纠错时只接收 ASR 输出和领域词表，不接收完整 reference。reference 仅用于纠错后的 CER 计算。
@@ -394,37 +422,45 @@ $env:LLM_MODEL="deepseek-chat"
 
 ```powershell
 python scripts\llm_correct_basketball_asr.py `
-  --input results/basketball_commentary/asr_results_basketball_commentary.csv `
-  --output results/basketball_commentary/asr_results_basketball_commentary_llm_corrected.csv `
+  --input results/basketball_commentary/asr_results_basketball_commentary_all.csv `
+  --output results/basketball_commentary/asr_results_basketball_commentary_all_llm_corrected.csv `
   --lexicon data/basketball_commentary/manifests/basketball_lexicon.txt
 ```
 
 ### 篮球 LLM 纠错结果
 
-| Sample         | CER Before LLM | CER After LLM | 结果             |
-| -------------- | -------------: | ------------: | ---------------- |
-| basketball_001 |         0.1786 |        0.0000 | 完全修正         |
-| basketball_002 |         0.1875 |        0.0000 | 完全修正         |
-| basketball_003 |         0.1379 |        0.1034 | 部分修正         |
-| basketball_004 |         0.1250 |        0.0750 | 部分修正         |
-| basketball_005 |         0.3103 |        0.2414 | 有改善但仍有错误 |
+| Sample         | CER Before LLM | CER After LLM | 结果         |
+| -------------- | -------------: | ------------: | ------------ |
+| basketball_001 |         0.1786 |        0.0000 | 完全修正     |
+| basketball_002 |         0.1875 |        0.0000 | 完全修正     |
+| basketball_003 |         0.1379 |        0.1034 | 部分修正     |
+| basketball_004 |         0.1250 |        0.1000 | 部分修正     |
+| basketball_005 |         0.3103 |        0.1724 | 明显改善     |
+| basketball_006 |         0.1154 |        0.1538 | 纠错后变差   |
+| basketball_007 |         0.0500 |        0.0500 | 基本无改善   |
+| basketball_008 |         0.0000 |        0.0000 | 原始识别正确 |
+| basketball_009 |         0.2333 |        0.2333 | 无改善       |
+| basketball_010 |         0.0909 |        0.0909 | 无改善       |
+| basketball_011 |         0.0256 |        0.0256 | 无改善       |
 
 平均 CER：
 
 ```text
-Before LLM: 0.1879
-After LLM:  0.0840
+Before LLM: 0.1322
+After LLM:  0.0845
 ```
 
 相对下降约：
 
 ```text
-55.3%
+36.1%
 ```
 
-### 典型纠错案例
+---
 
-#### 完全修正：球队名与比赛阶段
+## 典型案例
+
+### 1. 完全修正：球队名与比赛阶段
 
 ```text
 ASR:
@@ -442,7 +478,7 @@ LLM:
 七决 → 西决
 ```
 
-#### 部分修正：篮球术语
+### 2. 部分修正：篮球术语
 
 ```text
 ASR:
@@ -465,36 +501,47 @@ LLM:
 但分出来了 → 再分出来了
 ```
 
-#### 失败风险：过度纠错
+### 3. 明显改善：球员名和术语
 
 ```text
 ASR:
 阿十瓦为力了嗯本丹今天的第一个分盖最终还是算在了切特的身上
 
 LLM:
-哈腾卡位了嗯文班今天的第一个封盖最终还是算在了切特的身上
+阿十瓦为力了文班今天的第一个封盖最终还是算在了切特的身上
 ```
 
-其中：
+成功修正：
 
 ```text
 本丹 → 文班
 分盖 → 封盖
 ```
 
-是有效修正，但：
+但未能恢复：
 
 ```text
-阿十瓦为力了 → 哈腾卡位了
+阿十瓦为力了 → 二十四秒违例了
 ```
 
-是错误补全。正确 reference 应为：
+### 4. 失败案例：纠错后变差
 
 ```text
-二十四秒违例了
+ASR:
+这样的话通过罚球已形队在第二节开场还是拿到两分的领先
+
+LLM:
+这样的话通过罚球已经在第二节开场还是拿到两分的领先
 ```
 
-这说明领域词表能帮助 LLM 修正部分错误，但在 ASR 输出严重失真时，也可能诱导 LLM 根据语境进行错误猜测。
+正确 reference 中应为：
+
+```text
+雷霆队
+第一节
+```
+
+该样本说明，LLM 有时会把错误文本改成语言上更自然的表达，但没有恢复正确的领域实体，导致 CER 反而上升。
 
 ---
 
@@ -505,10 +552,10 @@ LLM:
 实验结果表明：
 
 1. FunASR/SenseVoice 在普通话自录短句上表现稳定；
-2. 篮球解说语音明显更具挑战性，平均 CER 达到 `0.1879`；
+2. 篮球解说语音明显更具挑战性，扩展后 11 条样本的平均 CER 为 `0.1322`；
 3. 错误主要集中在球员名、球队名、篮球术语、比赛阶段表达和快节奏语音中；
-4. 加入篮球领域词表后，LLM 纠错将平均 CER 降低到 `0.0840`，相对下降约 `55.3%`；
-5. LLM 后处理适合作为 ASR 系统之后的轻量级纠错模块，但在严重识别错误时存在过度纠错风险。
+4. 加入篮球领域词表后，LLM 纠错将平均 CER 降低到 `0.0845`，相对下降约 `36.1%`；
+5. LLM 后处理适合作为 ASR 系统之后的轻量级纠错模块，但在严重识别错误、漏识别或语义模糊时存在无效纠错和过度纠错风险。
 
 ---
 
@@ -517,10 +564,10 @@ LLM:
 当前项目仍然是一个小型实验，存在以下局限：
 
 - 普通话测试集规模较小；
-- 篮球解说测试集目前只有 5 个片段；
+- 篮球解说测试集目前只有 11 个片段；
 - 篮球词表主要围绕当前样本构造，尚不是完整领域词典；
 - 未进行 ASR 模型训练或微调；
-- LLM 纠错依赖外部 API，且可能产生过度纠错。
+- LLM 纠错依赖外部 API，且可能产生无效纠错或过度纠错。
 
 后续可以扩展更多篮球解说片段、更多说话人和更完整的篮球术语词表，并进一步分析不同错误类型下 LLM 纠错的有效性。
 

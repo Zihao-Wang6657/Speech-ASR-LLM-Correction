@@ -382,3 +382,53 @@ LLM-corrected:
 这说明，LLM-based ASR correction 在领域语音识别场景中具有明显潜力。尤其是在篮球解说这类包含大量专有名词和领域术语的场景中，领域词表能够为 LLM 提供有效先验，从而改善 ASR 输出。
 
 不过，该方法并不能替代 ASR 模型本身的鲁棒性提升。在严重识别错误、漏识别、多人重叠语音或切片质量较差的情况下，LLM 可能只能部分修正，甚至可能产生错误补全。因此，更合理的定位是：LLM 纠错适合作为 ASR 系统之后的轻量级后处理模块。
+
+---
+
+## 后续 Prompt Ablation 实验
+
+在上述领域词表增强 LLM 纠错基础上，项目进一步进行了 prompt ablation，比较不同提示策略对纠错效果和稳定性的影响。
+
+新增脚本：
+
+```text
+scripts/llm_correct_basketball_asr_prompt_ablation.py
+```
+
+实验记录：
+
+```text
+notes/prompt_ablation_basketball_llm.md
+```
+
+输出目录：
+
+```text
+results/basketball_commentary/prompt_ablation/
+```
+
+本次比较了四种 prompt：
+
+| Prompt | 名称 | 设计重点 |
+| --- | --- | --- |
+| A | baseline | 复用当前领域词表增强 prompt，作为现有方法复现 |
+| B | conservative | 只在词表相关、明显音近或语境证据充分时修改 |
+| C | two-stage | 先内部判断是否需要修改和依据是否充分，再输出最终文本 |
+| D | few-shot | 加入成功示例和失败警示，减少语言通顺性诱导 |
+
+Prompt ablation 汇总结果：
+
+| prompt_name | avg_cer_before | avg_cer_after | relative_reduction | num_improved | num_degraded | num_unchanged | num_exact |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| prompt_a_baseline | 0.1322 | 0.0787 | 0.4051 | 5 | 1 | 3 | 2 |
+| prompt_b_conservative | 0.1322 | 0.0859 | 0.3506 | 4 | 0 | 4 | 3 |
+| prompt_c_two_stage | 0.1322 | 0.0923 | 0.3016 | 6 | 0 | 4 | 1 |
+| prompt_d_few_shot | 0.1322 | 0.0859 | 0.3506 | 4 | 0 | 4 | 3 |
+
+主要结论：
+
+1. `prompt_a_baseline` 平均 CER 最低，为 `0.0787`，相对原始 ASR 下降 `40.51%`；
+2. `prompt_b_conservative` 和 `prompt_d_few_shot` 没有 degraded 样本，稳定性优于 baseline；
+3. `basketball_006` 中，四种 prompt 均避免了“已形队 -> 已经”的错误纠正，说明 prompt 约束可以抑制单纯追求语言通顺的过度纠错；
+4. baseline 唯一 degraded 样本是原始 CER 为 0 的 `basketball_008`，说明较激进的纠错策略可能破坏原本正确的 ASR 输出；
+5. 后续模型比较可优先选择 conservative 或 few-shot 作为稳定 prompt，同时保留 baseline 作为最低平均 CER 对照。

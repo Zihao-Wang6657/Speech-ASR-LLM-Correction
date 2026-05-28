@@ -23,6 +23,9 @@
 3. **领域词表增强 LLM 纠错**  
    在篮球解说 ASR 输出上，向 LLM 提供篮球领域词表后，平均 CER 从 `0.1322` 降低到 `0.0845`，相对下降约 `36.1%`。
 
+4. **Prompt Ablation 分析**  
+   比较 baseline、conservative、two-stage 和 few-shot 四种篮球领域纠错 prompt。baseline 平均 CER 最低，达到 `0.0787`；conservative 和 few-shot 没有 degraded 样本，稳定性更好。
+
 ---
 
 ## 整体流程
@@ -94,7 +97,8 @@ Speech-Project
 │   ├── robustness_evaluation.md
 │   ├── llm_error_correction.md
 │   ├── basketball_commentary_evaluation.md
-│   └── basketball_llm_correction.md
+│   ├── basketball_llm_correction.md
+│   └── prompt_ablation_basketball_llm.md
 │
 ├── results
 │   ├── mandarin
@@ -102,7 +106,13 @@ Speech-Project
 │       ├── asr_results_basketball_commentary.csv
 │       ├── asr_results_basketball_commentary_match_002.csv
 │       ├── asr_results_basketball_commentary_all.csv
-│       └── asr_results_basketball_commentary_all_llm_corrected.csv
+│       ├── asr_results_basketball_commentary_all_llm_corrected.csv
+│       └── prompt_ablation
+│           ├── prompt_a_baseline.csv
+│           ├── prompt_b_conservative.csv
+│           ├── prompt_c_two_stage.csv
+│           ├── prompt_d_few_shot.csv
+│           └── prompt_ablation_summary.csv
 │
 └── scripts
     ├── create_robustness_data.py
@@ -110,7 +120,8 @@ Speech-Project
     ├── summarize_asr_results.py
     ├── llm_correct_asr.py
     ├── create_basketball_segments.py
-    └── llm_correct_basketball_asr.py
+    ├── llm_correct_basketball_asr.py
+    └── llm_correct_basketball_asr_prompt_ablation.py
 ```
 
 ---
@@ -545,6 +556,50 @@ LLM:
 
 ---
 
+## 篮球 LLM 纠错 Prompt Ablation
+
+为了进一步分析 prompt 策略对领域 ASR 纠错的影响，本项目新增了 prompt ablation 实验，比较四种提示方式：
+
+| Prompt | 名称 | 设计重点 |
+| ------ | ---- | -------- |
+| A | baseline | 复用领域词表增强纠错 prompt，优先修正明显篮球实体和术语错误 |
+| B | conservative | 只在词表相关、明显音近或上下文证据充分时修改，不为了通顺改写 |
+| C | two-stage | 要求模型先内部判断是否需要修改和依据是否充分，再输出最终文本 |
+| D | few-shot | 加入成功纠错示例和失败警示，提醒模型不要把“已形队”改成“已经” |
+
+运行命令：
+
+```powershell
+python scripts\llm_correct_basketball_asr_prompt_ablation.py `
+  --input results/basketball_commentary/asr_results_basketball_commentary_all.csv `
+  --lexicon data/basketball_commentary/manifests/basketball_lexicon.txt `
+  --output-dir results/basketball_commentary/prompt_ablation
+```
+
+Prompt ablation 汇总结果：
+
+| Prompt | Samples | CER Before | CER After | Relative Reduction | Improved | Degraded | Unchanged | Exact |
+| ------ | ------: | ---------: | --------: | -----------------: | -------: | -------: | --------: | ----: |
+| prompt_a_baseline | 11 | 0.1322 | 0.0787 | 40.51% | 5 | 1 | 3 | 2 |
+| prompt_b_conservative | 11 | 0.1322 | 0.0859 | 35.06% | 4 | 0 | 4 | 3 |
+| prompt_c_two_stage | 11 | 0.1322 | 0.0923 | 30.16% | 6 | 0 | 4 | 1 |
+| prompt_d_few_shot | 11 | 0.1322 | 0.0859 | 35.06% | 4 | 0 | 4 | 3 |
+
+主要发现：
+
+- `prompt_a_baseline` 的平均 CER 最低，从 `0.1322` 降到 `0.0787`；
+- `prompt_b_conservative` 和 `prompt_d_few_shot` 没有 degraded 样本，更适合作为稳定纠错策略；
+- `basketball_006` 中，四种 prompt 都没有再把“已形队”改成“已经”；baseline 和 two-stage 进一步恢复为“雷霆队”，但仍未修正“第二节 -> 第一节”；
+- baseline 唯一 degraded 样本是 `basketball_008`，该样本原始 CER 为 0，但 baseline 删除了“的”，说明较激进的纠错可能破坏原本正确的输出。
+
+详细实验记录见：
+
+```text
+notes/prompt_ablation_basketball_llm.md
+```
+
+---
+
 ## 结论
 
 本项目完成了一个轻量级中文 ASR 评测与后处理流程。
@@ -555,7 +610,8 @@ LLM:
 2. 篮球解说语音明显更具挑战性，扩展后 11 条样本的平均 CER 为 `0.1322`；
 3. 错误主要集中在球员名、球队名、篮球术语、比赛阶段表达和快节奏语音中；
 4. 加入篮球领域词表后，LLM 纠错将平均 CER 降低到 `0.0845`，相对下降约 `36.1%`；
-5. LLM 后处理适合作为 ASR 系统之后的轻量级纠错模块，但在严重识别错误、漏识别或语义模糊时存在无效纠错和过度纠错风险。
+5. Prompt ablation 进一步将最佳平均 CER 降低到 `0.0787`，同时显示 conservative / few-shot prompt 可以减少 degraded samples；
+6. LLM 后处理适合作为 ASR 系统之后的轻量级纠错模块，但在严重识别错误、漏识别或语义模糊时存在无效纠错和过度纠错风险。
 
 ---
 
@@ -567,9 +623,10 @@ LLM:
 - 篮球解说测试集目前只有 11 个片段；
 - 篮球词表主要围绕当前样本构造，尚不是完整领域词典；
 - 未进行 ASR 模型训练或微调；
-- LLM 纠错依赖外部 API，且可能产生无效纠错或过度纠错。
+- LLM 纠错依赖外部 API，且可能产生无效纠错或过度纠错；
+- 当前 prompt ablation 只在一个 LLM 模型上运行，尚未进行跨模型比较。
 
-后续可以扩展更多篮球解说片段、更多说话人和更完整的篮球术语词表，并进一步分析不同错误类型下 LLM 纠错的有效性。
+后续可以扩展更多篮球解说片段、更多说话人和更完整的篮球术语词表，并进一步分析不同错误类型下 LLM 纠错的有效性。下一步可在同一批 ASR 输出和同一个最佳 prompt 下比较不同 LLM 模型，观察 avg CER after、degraded samples 和 exact samples 的差异。更远期可以探索 speaker diarization、overlapped speech detection 和 ASR timestamp alignment，用于分析多人解说或重叠语音。
 
 ---
 

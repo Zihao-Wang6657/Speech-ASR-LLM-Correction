@@ -287,4 +287,27 @@ ASR:       阿十瓦为力了嗯本丹今天的第一个分盖最终还是算在
 
 这说明体育解说场景中的领域术语、球员名、球队名、快速语速和可能的重叠语音都会显著影响 ASR 效果。
 
-下一步可以引入 basketball terminology-aware LLM correction，即向 LLM 提供篮球术语、球队名和球员名词表，测试领域词表是否能够帮助修正 ASR 错误。
+后续项目已将篮球解说测试集扩展到 11 个片段，并合并为总 manifest：
+
+```text
+data/basketball_commentary/manifests/basketball_commentary_manifest_all.csv
+```
+
+扩展后的 ASR 总结果为：
+
+```text
+results/basketball_commentary/asr_results_basketball_commentary_all.csv
+```
+
+11 条样本的平均 CER 为：
+
+```text
+0.1322
+```
+
+在此基础上，项目进一步引入 basketball terminology-aware LLM correction，并完成了 prompt ablation 分析。相关记录见：
+
+```text
+notes/basketball_llm_correction.md
+notes/prompt_ablation_basketball_llm.md
+```

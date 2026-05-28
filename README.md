@@ -16,9 +16,9 @@
 | 模块 | 核心结果 |
 | --- | --- |
 | 普通话自录语音 | 构建多条 clean speech 数据, 平均 CER 为 `0.0000`，轻度语速和噪声扰动下整体稳定。 |
-| 篮球解说 ASR | 构建多条篮球解说片段，原始平均 CER 为 `0.1322`，错误集中在球员名、球队名、篮球术语和比赛阶段。 |
+| 篮球比赛解说 ASR | 构建多条篮球解说片段，原始平均 CER 为 `0.1322`，错误集中在球员名、球队名、篮球术语和比赛阶段。 |
 | 领域词表增强 LLM 纠错 | 加入篮球领域词表后，平均 CER 从 `0.1322` 降到 `0.0845`，相对下降约 `36.1%`。 |
-| Prompt Ablation | 对比 baseline、conservative、two-stage、few-shot 四种 prompt；baseline 最低 CER 为 `0.0787`，conservative/few-shot 更稳定。 |
+| 多类型 Prompt 对比| 对比 baseline、conservative、two-stage、few-shot 四种 prompt；baseline 最低 CER 为 `0.0787`，conservative/few-shot 更稳定。 |
 | 多模型 LLM 对比 | 固定 conservative prompt，对比 DeepSeek、Qwen、Kimi；Qwen `qwen3.7-max` 最优，平均 CER 降到 `0.0765`，且无 degraded 样本。 |
 
 ## 当前最佳结果
@@ -29,8 +29,8 @@
 | --- | ---: | ---: | --- |
 | 原始 ASR | 0.1322 | - | SenseVoice 原始输出 |
 | 领域词表增强 LLM | 0.0845 | 36.1% | 使用篮球词表的单 prompt 纠错 |
-| Prompt Ablation 最佳平均值 | 0.0787 | 40.51% | baseline prompt，平均 CER 最低 |
-| Model Comparison 最佳模型 | 0.0765 | 42.18% | Qwen `qwen3.7-max` + conservative prompt |
+| 多类型 Prompt 对比 最佳平均值 | 0.0787 | 40.51% | baseline prompt，平均 CER 最低 |
+| 多模型对比 最佳模型 | 0.0765 | 42.18% | Qwen `qwen3.7-max` + conservative prompt |
 
 ### 多模型对比
 

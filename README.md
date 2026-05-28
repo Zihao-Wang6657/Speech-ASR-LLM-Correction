@@ -98,7 +98,8 @@ Speech-Project
 │   ├── llm_error_correction.md
 │   ├── basketball_commentary_evaluation.md
 │   ├── basketball_llm_correction.md
-│   └── prompt_ablation_basketball_llm.md
+│   ├── prompt_ablation_basketball_llm.md
+│   └── model_comparison_basketball_llm.md
 │
 ├── results
 │   ├── mandarin
@@ -113,6 +114,8 @@ Speech-Project
 │           ├── prompt_c_two_stage.csv
 │           ├── prompt_d_few_shot.csv
 │           └── prompt_ablation_summary.csv
+│       └── model_comparison
+│           └── model_comparison_summary.csv
 │
 └── scripts
     ├── create_robustness_data.py
@@ -121,7 +124,8 @@ Speech-Project
     ├── llm_correct_asr.py
     ├── create_basketball_segments.py
     ├── llm_correct_basketball_asr.py
-    └── llm_correct_basketball_asr_prompt_ablation.py
+    ├── llm_correct_basketball_asr_prompt_ablation.py
+    └── llm_correct_basketball_asr_model_comparison.py
 ```
 
 ---
@@ -600,6 +604,68 @@ notes/prompt_ablation_basketball_llm.md
 
 ---
 
+## 篮球 LLM 模型对比
+
+在 prompt ablation 之后，本项目加入固定 prompt 下的模型对比实验。该实验固定使用稳定性较好的 `prompt_b_conservative`，比较 DeepSeek、Qwen、Kimi 等模型在同一批篮球解说 ASR 输出上的纠错效果。
+
+脚本：
+
+```text
+scripts/llm_correct_basketball_asr_model_comparison.py
+```
+
+实验记录：
+
+```text
+notes/model_comparison_basketball_llm.md
+```
+
+运行前需要在 PowerShell 中设置各 provider 的环境变量。API key 只通过环境变量传入，不写入代码或文档。
+
+```powershell
+$env:DEEPSEEK_API_KEY="your_deepseek_api_key"
+$env:DEEPSEEK_URL="https://api.deepseek.com"
+$env:DEEPSEEK_MODEL="deepseek-v4-pro"
+
+$env:QWEN_API_KEY="your_qwen_api_key"
+$env:QWEN_URL="https://dashscope.aliyuncs.com/compatible-mode/v1"
+$env:QWEN_MODEL="Qwen3.7-Max"
+
+$env:KIMI_API_KEY="your_kimi_api_key"
+$env:KIMI_URL="https://api.siliconflow.cn/v1"
+$env:KIMI_MODEL="Pro/moonshotai/Kimi-K2.6"
+```
+
+运行命令：
+
+```powershell
+python scripts\llm_correct_basketball_asr_model_comparison.py `
+  --input results/basketball_commentary/asr_results_basketball_commentary_all.csv `
+  --lexicon data/basketball_commentary/manifests/basketball_lexicon.txt `
+  --output-dir results/basketball_commentary/model_comparison `
+  --providers deepseek,qwen,kimi
+```
+
+该实验重点比较：
+
+- 平均纠错后 CER；
+- degraded samples 数量；
+- exact samples 数量；
+- `basketball_006` 是否避免过度纠错；
+- `basketball_008` 这种原本正确样本是否被破坏。
+
+当前模型对比结果：
+
+| Provider | Model | CER Before | CER After | Relative Reduction | Improved | Degraded | Exact | API Error |
+| -------- | ----- | ---------: | --------: | -----------------: | -------: | -------: | ----: | --------: |
+| DeepSeek | deepseek-v4-pro | 0.1322 | 0.0987 | 25.32% | 2 | 1 | 2 | 0 |
+| Qwen | qwen3.7-max | 0.1322 | 0.0765 | 42.18% | 4 | 0 | 3 | 0 |
+| Kimi | Pro/moonshotai/Kimi-K2.6 | 0.1322 | 0.0859 | 35.06% | 4 | 0 | 3 | 0 |
+
+本轮有效比较中，Qwen 的平均 CER after 最低且没有 degraded 样本，是当前固定 conservative prompt 下表现最好的模型候选。Kimi 同样没有 degraded，稳定性也较好。DeepSeek 也有改善，但会破坏 `basketball_008` 这类原本正确样本。Qwen 首次使用 `Qwen3.7-Max` 时返回 404，将模型 ID 改为 `qwen3.7-max` 后调用成功。
+
+---
+
 ## 结论
 
 本项目完成了一个轻量级中文 ASR 评测与后处理流程。
@@ -611,7 +677,8 @@ notes/prompt_ablation_basketball_llm.md
 3. 错误主要集中在球员名、球队名、篮球术语、比赛阶段表达和快节奏语音中；
 4. 加入篮球领域词表后，LLM 纠错将平均 CER 降低到 `0.0845`，相对下降约 `36.1%`；
 5. Prompt ablation 进一步将最佳平均 CER 降低到 `0.0787`，同时显示 conservative / few-shot prompt 可以减少 degraded samples；
-6. LLM 后处理适合作为 ASR 系统之后的轻量级纠错模块，但在严重识别错误、漏识别或语义模糊时存在无效纠错和过度纠错风险。
+6. 在固定 conservative prompt 的模型对比中，Qwen 当前表现最好，平均 CER after 为 `0.0765`，且没有 degraded 样本；
+7. LLM 后处理适合作为 ASR 系统之后的轻量级纠错模块，但在严重识别错误、漏识别或语义模糊时存在无效纠错和过度纠错风险。
 
 ---
 
@@ -624,7 +691,7 @@ notes/prompt_ablation_basketball_llm.md
 - 篮球词表主要围绕当前样本构造，尚不是完整领域词典；
 - 未进行 ASR 模型训练或微调；
 - LLM 纠错依赖外部 API，且可能产生无效纠错或过度纠错；
-- 当前 prompt ablation 只在一个 LLM 模型上运行，尚未进行跨模型比较。
+- Qwen 模型 ID 对大小写敏感，需使用 `qwen3.7-max` 这类正确模型 ID；错误大小写会导致 API 404。
 
 后续可以扩展更多篮球解说片段、更多说话人和更完整的篮球术语词表，并进一步分析不同错误类型下 LLM 纠错的有效性。下一步可在同一批 ASR 输出和同一个最佳 prompt 下比较不同 LLM 模型，观察 avg CER after、degraded samples 和 exact samples 的差异。更远期可以探索 speaker diarization、overlapped speech detection 和 ASR timestamp alignment，用于分析多人解说或重叠语音。
 

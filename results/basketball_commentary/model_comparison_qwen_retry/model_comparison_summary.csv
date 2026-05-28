@@ -1,0 +1,2 @@
+﻿provider,model,prompt_name,num_samples,avg_cer_before,avg_cer_after,relative_reduction,num_improved,num_degraded,num_unchanged,num_exact,num_api_error,output_file
+qwen,qwen3.7-max,prompt_b_conservative,11,0.1322,0.0765,0.4218,4,0,4,3,0,results\basketball_commentary\model_comparison_qwen_retry\qwen_qwen3.7-max.csv

@@ -1,0 +1,4 @@
+﻿provider,model,prompt_name,num_samples,avg_cer_before,avg_cer_after,relative_reduction,num_improved,num_degraded,num_unchanged,num_exact,num_api_error,output_file
+deepseek,deepseek-v4-pro,prompt_b_conservative,11,0.1322,0.0987,0.2532,2,1,6,2,0,results\basketball_commentary\model_comparison\deepseek_deepseek-v4-pro.csv
+qwen,Qwen3.7-Max,prompt_b_conservative,11,0.1322,0.1322,0.0000,0,0,0,0,11,results\basketball_commentary\model_comparison\qwen_qwen3.7-max.csv
+kimi,Pro/moonshotai/Kimi-K2.6,prompt_b_conservative,11,0.1322,0.0859,0.3506,4,0,4,3,0,results\basketball_commentary\model_comparison\kimi_pro_moonshotai_kimi-k2.6.csv

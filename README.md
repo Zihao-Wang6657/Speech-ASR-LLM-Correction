@@ -59,7 +59,7 @@ Speech-Project
 │   │   ├── manifests/
 │   │   └── tmp/
 │   └── basketball_commentary/
-│       ├── source/                         # 原始视频/音频，已忽略
+│       ├── source/                         
 │       ├── segments/
 │       └── manifests/
 │           ├── basketball_commentary_manifest_all.csv
